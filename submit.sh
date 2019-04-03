@@ -9,9 +9,9 @@ if [[ "$websiteName" ]]; then
 	input="$websiteName"
 fi
 
-name=$(echo "${input,,}" | xargs | sed -r "s/[^a-z0-9]+/-/g")
+name=$(echo "${input,,}" | xargs | sed -r "s/[^a-z0-9]+/-/g" | sed -r "s/^-|-$//g")
 
-if [[ ! "$name" || "$name" == "http-www-*" ]]; then
+if [[ ! "$name" || "$name" == "https-www-"* || "$name" == "http-www-"* ]]; then
 	echo "Bad input"
 	exit 1
 fi
