@@ -1,0 +1,74 @@
+Theoretically, you just need to find the point between sorted alphabetically, or reverse alphabetically, which is from 1 to factorial(length).
+
+== SCRATCH PAD INSPIRATION ==
+
+NOTE: 8! = 40320
+
+UTSQONIE = 40320 // Lexicographically sorted
+UTSQONEI = 40319 // -1! = swap index -1 and -2
+...
+QUESTION = 24572
+...
+EINOSQTU = 7 // +3! = swap index -3 and -4
+EINOQUTS = 6
+EINOQUST = 5
+EINOQTUS = 4
+EINOQTSU = 3 // +2! = swap index -2 and -3
+EINOQSUT = 2 // +1! = swap index -1 and -2
+EINOQSTU = 1 // Reverse lexico sorted
+
+
+== SWAP THEORY - THEORY FOR WORDS WITHOUT DUPLICATES (DISPROVED) ==
+Swapping letters is equal to:
+	SUM{factorial(length - position) * swapDistance}
+
+EINOQSTU = 1
+QINOESTU = 4*7! (20160)
+QUNOESTI = 6*6! (4320)
+QUEONSTI = 2*5! (240)
+QUESNOTI = 2*4! (48)
+QUESTONI = 2*3! (12)
+QUESTINO = 2*2! (4)
+QUESTION = 2*1! (2)
+TOTAL = 24786 (WRONG - should be 24572, off by 214)
+
+
+== MOVE THEORY - THEORY FOR WORDS WITHOUT DUPLICATES (PROVEN) ==
+Moving letters is equal to:
+	SUM{factorial(length - position) * moveDistance}
+
+EINOQSTU = 1
+QEINOSTU = 4*7! (20160)
+QUEINOST = 6*6! (4320)
+QUEINOST = 0*5! (0)
+QUESINOT = 3*4! (72)
+QUESTINO = 3*3! (18)
+QUESTION = 1*2! (2)
+QUESTION = 0*1! (0)
+TOTAL = 24572 (CORRECT)
+
+// = 4*7!(20160) + 6*6!(4320) + 0*5!(0) + 3*4!(72) + 3*3!(18) + 0*2!(0) + 0 + 2
+
+== MOVE THEORY ENHANCED - THEORY FOR WORDS WITH DUPLICATE LETTERS (DISPROVEN) ==
+When moving a letter using MOVE THEORY (MT), it appears that the result is about twice what it should be if there is a duplicate at the end.
+For solving words that contain a duplicated letter, it SEEMS that if the letter is being moved BEFORE the pair, it should be halved.
+
+This was proven using a basic example, "ZACXBX":
+
+MT result = 609 = (600 + 6 + 2 + 1)
+True result = 305 = (600 / 2 + 6 / 2 + 2 / 2)
+
+This seems to hold true for other, slightly more complicated examples, that still only have a double.
+
+I'm going to assume that if there are 2 doubles, then I just multiply them together, and divide?
+
+(TENTATIVELY CONFIRMED?)
+
+I'm going to assume that this works for triples?
+
+(FALSE) - Number too large. Need a larger divisor.
+
+I'm going to assume that I need to use factorials on these too?
+Meaning that if I have a triple, I need to divide by 3! (=6)
+
+(CONFIRMED and SOLVED)
