@@ -46,3 +46,8 @@ fi
 vim "$name.$ext"
 
 echo "<html><head><meta http-equiv=\"refresh\" content=\"0; url=https://www.codewars.com/kata/$name/${ext[1]}\" /></head></html>" > "link.html"
+
+git pull
+git add --all
+git commit -m "Completed '$name' challenge"
+git push
