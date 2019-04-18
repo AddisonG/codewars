@@ -1,0 +1,195 @@
+// THIS IS A WORK IN PROGRESS. Saving for safekeeping
+import java.util.*;
+
+/**
+  * Terminology:
+  *  - To "OPEN" is to activate a cell that is unknown
+  *  - A cell can be one of 3 states: "UNKNOWN", "SAFE" or "MINE"
+  * 
+  * ROW = Y = HEIGHT
+  * COL = X = WIDTH
+  */
+class MineSweeper {
+  private final List<List<Character>> board;
+  private final Set<Cell> cells, unresolvedCells;
+  private int rows = 0, cols, nMines;
+  
+  public static final char MINE = 'x';
+  public static final char UNKNOWN = '?';
+  
+  public MineSweeper(final String grid, final int nMines) {
+    System.out.println("-----------START-----------");
+    this.cols = grid.indexOf('\n') / 2 + 1;
+    this.cells = new HashSet();
+    this.board = readBoard(grid);
+    this.unresolvedCells = new HashSet<>(cells);
+    this.rows = board.size();
+    this.nMines = nMines;
+  }
+  
+  public String solve() {
+    while (true) {
+    // Touch everything around zeros
+      if (zeroWalker()) {
+        continue;
+      }
+      
+      // If a cell can only have mines around it, flag them all
+      if (surroundedWalker()) {
+        continue;
+      }
+      
+      
+      break; // No progress is being made.
+    }
+    System.out.println("------------END------------");
+    return writeBoard();
+  }
+  
+  private boolean zeroWalker() {
+    boolean result = false;
+    Iterator<Cell> iter = unresolvedCells.iterator();
+    while (iter.hasNext()) {
+      Cell cell = iter.next();
+      if (cell.getState() == '0') {
+//         System.out.println("Found " + cell + " " + cell.getSurroundingMines() + " " + cell.getSurroundingUnknown());
+        cell.getSurroundingUnknown().forEach(surrounding -> surrounding.open());
+        iter.remove();
+        result = true;
+        System.out.println("Zero Walker Trigger");
+      }
+    }
+    return result;
+  }
+  
+  private boolean surroundedWalker() {
+    boolean result = false;
+    Iterator<Cell> iter = unresolvedCells.iterator();
+    while (iter.hasNext()) {
+      Cell cell = iter.next();
+      int stateValue = cell.getState() - '0';
+      if (stateValue > 0 && stateValue < 9) {
+        List<Cell> unknowns = cell.getSurroundingUnknown();
+        List<Cell> mines = cell.getSurroundingMines();
+//         System.out.println("Found " + cell + " " + mines + " " + unknowns);
+        if (stateValue - mines.size() == unknowns.size()) {
+          unknowns.forEach(unknown -> unknown.setState(MINE));
+          nMines -= unknowns.size();
+          iter.remove();
+          result = true;
+          System.out.println("Surrounded Walker Trigger");
+        } else if (stateValue == mines.size()) {
+          unknowns.forEach(surrounding -> surrounding.open());
+          iter.remove();
+          result = true;
+          System.out.println("Satisfied Walker Trigger 2");
+        }
+      }
+    }
+    return result;
+  }
+  
+  private List<List<Character>> readBoard(String grid) {
+    List<List<Character>> board = new ArrayList<>();
+    Cell previous = null;
+    List<Cell> previousRow = null;
+    
+    int row = 0, col;
+    for (String line : grid.split("\n")) {
+      List<Character> lineList = new ArrayList<>(line.length() / 2 + 1);
+      board.add(lineList);
+      
+      col = 0;
+      List<Cell> thisRow = new ArrayList<>();
+      previous = null;
+      
+      for (char c : line.toCharArray()) {
+        if (c == ' ') {
+          continue;
+        }
+        lineList.add(c);
+        Cell cell = new Cell(row, col, previous, previousRow);
+        cells.add(cell);
+        thisRow.add(cell);
+        previous = cell;
+        col++;
+      }
+      row++;
+      previousRow = thisRow;
+    }
+    return board;
+  }
+  
+  private String writeBoard() {
+    StringBuilder sb = new StringBuilder();
+    for (List<Character> row : board) {
+      for (char cell : row) {
+        sb.append(cell).append(" ");
+      }
+      sb.setLength(sb.length() - 1);
+      sb.append('\n');
+    }
+    sb.setLength(sb.length() - 1);
+    return sb.toString();
+  }
+  
+  private class Cell {
+    private final int row, col;
+    private final List<Cell> surrounding = new ArrayList<>(); // Stored Left->Right, Top->Bottom (like a book)
+    private final boolean resolved = false; // TODO FIXME use this
+    
+    public Cell(int row, int col, Cell previous, List<Cell> previousRow) {
+      this.row = row;
+      this.col = col;
+      
+      if (previousRow != null) {
+        linkCells(col > 0 ? previousRow.get(col - 1) : null);
+        linkCells(previousRow.get(col));
+        linkCells(col + 1 < cols ? previousRow.get(col + 1) : null);
+      }
+      linkCells(previous);
+    }
+    
+    private void linkCells(Cell other) {
+      if (other != null) {
+        other.surrounding.add(this);
+        this.surrounding.add(other);
+      }
+    }
+    
+    public char getState() {
+      return board.get(row).get(col);
+    }
+    
+    public void setState(char state) {
+      board.get(row).set(col, state);
+    }
+    
+    public List<Cell> getSurrounding() {
+      return new ArrayList<>(surrounding);
+    }
+    
+    public List<Cell> getSurroundingUnknown() {
+      List<Cell> list = getSurrounding();
+//       System.out.println(this + " surrounding = " + surrounding);
+      list.removeIf(cell -> cell.getState() != UNKNOWN);
+      return list;
+    }
+    
+    public List<Cell> getSurroundingMines() {
+      List<Cell> list = getSurrounding();
+      list.removeIf(cell -> cell.getState() != MINE);
+      return list;
+    }
+    
+    public int open() {
+      int result = Game.open(row, col);
+      setState((char) (result + '0'));
+      return result;
+    }
+    
+    public String toString() {
+      return "(" + col + "," + row + "=" + getState() + ")";
+    }
+  }
+}
