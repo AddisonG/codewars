@@ -27,6 +27,9 @@ case $ext in
 	c|go|java)
 		ext=($ext $ext)
 		;;
+	bash|shell|sh)
+		ext=(sh shell)
+		;;
 	*)
 		echo "Invalid / new language"
 		exit 2
