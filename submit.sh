@@ -3,7 +3,7 @@
 read -p "Please enter the name/url of the Kata: " input
 
 # Attempt to get interpret user input as a URL
-websiteName=$(curl -skm 15 "$input" | grep -oP '<meta content="\K[^"]*(?=" property="og:title" />)')
+websiteName=$(curl -skm 15 "$(echo $input | sed 's/train\/.*//')" | grep -oP '<meta content="\K[^"]*(?=" property="og:title" />)')
 
 if [[ "$websiteName" ]]; then
 	input="$websiteName"
