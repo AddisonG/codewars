@@ -1,4 +1,4 @@
-#!/bin/bash +x
+#!/bin/bash
 
 read -p "Please enter the name/url of the Kata: " input
 
